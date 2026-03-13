@@ -1,3 +1,5 @@
+import type { PresetKey } from "./date-utils";
+
 export type RelevanceTier = "core" | "ecosystem" | "adjacent";
 
 export interface RepoClassification {
@@ -58,3 +60,48 @@ export interface DateRange {
 
 /** Sentinel repo name for contributions not broken down per-repo (e.g. issues). */
 export const AGGREGATED_SENTINEL = "__github_aggregated__";
+
+// --- Phase 3: Drill-Down Types ---
+
+export interface ContributionDetail {
+  id: number;
+  number: number;
+  title: string;
+  repoNameWithOwner: string;
+  type: "pr" | "issue" | "review";
+  state: "open" | "closed" | "merged";
+  createdAt: string;
+  closedAt: string | null;
+  url: string;
+}
+
+export interface PRDetail {
+  number: number;
+  repoNameWithOwner: string;
+  additions: number;
+  deletions: number;
+  changedFiles: number;
+  commits: number;
+  mergedAt: string | null;
+  timeToMerge: number | null; // milliseconds
+  reviewCount: number;
+}
+
+export interface PaginatedContributions {
+  items: ContributionDetail[];
+  totalCount: number;
+  hasMore: boolean;
+  page: number;
+}
+
+export type DrillDownTab = "prs" | "reviews" | "issues";
+
+export interface ContributionFilters {
+  tab: DrillDownTab;
+  preset: PresetKey | "custom";
+  from?: string;
+  to?: string;
+  project?: string;
+  status?: "open" | "closed" | "merged" | "all";
+  tier?: RelevanceTier | "all";
+}

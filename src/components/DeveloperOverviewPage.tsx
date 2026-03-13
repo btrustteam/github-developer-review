@@ -12,6 +12,7 @@ import { StatsGrid } from "@/components/StatsGrid";
 import { ContributionHeatmap } from "@/components/ContributionHeatmap";
 import { ContributionTimeline } from "@/components/ContributionTimeline";
 import { TopProjects } from "@/components/TopProjects";
+import { ContributionDrillDown } from "@/components/ContributionDrillDown";
 import {
   ProfileCardSkeleton,
   StatsGridSkeleton,
@@ -109,6 +110,11 @@ export function DeveloperOverviewPage({ username }: DeveloperOverviewPageProps) 
               bitcoinRepos={data.bitcoinRepos}
               contributions={data.contributions}
               showAdjacent={showAdjacent}
+            />
+
+            <ContributionDrillDown
+              username={username}
+              bitcoinRepos={data.bitcoinRepos}
             />
           </div>
         )}

@@ -3,11 +3,9 @@ import { auth } from "@/lib/auth";
 import { getCached, setCache } from "@/lib/cache";
 import { fetchAllContributions } from "@/lib/github-graphql";
 import { classifyRepos } from "@/lib/bitcoin-repos";
+import { GITHUB_USERNAME_RE } from "@/lib/utils";
 import { RateLimitError } from "@/lib/types";
 import type { DeveloperOverview } from "@/lib/types";
-
-// I5: GitHub username validation
-const GITHUB_USERNAME_RE = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
 
 export async function GET(
   request: Request,

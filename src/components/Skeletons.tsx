@@ -86,3 +86,17 @@ export function TimelineSkeleton() {
     </div>
   );
 }
+
+export function ContributionTableSkeleton() {
+  return (
+    <div role="status" aria-label="Loading contributions" className="animate-pulse space-y-3">
+      {Array.from({ length: 5 }, (_, i) => (
+        <div key={i} className="flex items-center gap-4 rounded-lg border p-4">
+          <div className="h-4 w-48 bg-gray-200 rounded" />
+          <div className="h-4 w-24 bg-gray-200 rounded" />
+          <div className="ml-auto h-4 w-16 bg-gray-200 rounded" />
+        </div>
+      ))}
+    </div>
+  );
+}

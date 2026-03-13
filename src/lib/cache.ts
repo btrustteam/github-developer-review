@@ -11,9 +11,9 @@ export async function getCached<T>(key: string): Promise<T | null> {
   }
 }
 
-export async function setCache<T>(key: string, data: T): Promise<void> {
+export async function setCache<T>(key: string, data: T, ttl?: number): Promise<void> {
   try {
-    await kv.set(key, data, { ex: DEFAULT_TTL });
+    await kv.set(key, data, { ex: ttl ?? DEFAULT_TTL });
   } catch {
     console.error(`Cache write failed for key "${key}"`);
   }

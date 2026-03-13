@@ -23,6 +23,14 @@ export function getYearRanges(createdAt: Date, now?: Date): DateRange[] {
 
 export type PresetKey = "30d" | "3mo" | "6mo" | "1yr" | "all";
 
+export function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export function getPresetRange(preset: PresetKey, now?: Date): DateRange {
   const to = now ?? new Date();
 
