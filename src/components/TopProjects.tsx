@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+"use client";
+
+import { useState, useMemo } from "react";
 import { Star, Globe, Minus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,40 +29,40 @@ const tierColors: Record<RelevanceTier, string> = {
 const PAGE_SIZE = 5;
 
 export function TopProjects({ bitcoinRepos, contributions, showAdjacent }: TopProjectsProps) {
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [pagination, setPagination] = useState({ count: PAGE_SIZE, filter: showAdjacent });
+  const visibleCount = pagination.filter === showAdjacent ? pagination.count : PAGE_SIZE;
 
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [showAdjacent]);
+  const countByRepo = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const c of contributions) {
+      if (c.repoNameWithOwner === AGGREGATED_SENTINEL) continue;
+      map.set(
+        c.repoNameWithOwner,
+        (map.get(c.repoNameWithOwner) ?? 0) + c.count
+      );
+    }
+    return map;
+  }, [contributions]);
 
-  const repos = showAdjacent
-    ? bitcoinRepos
-    : bitcoinRepos.filter((r) => r.tier !== "adjacent");
+  const sorted = useMemo(() => {
+    const repos = showAdjacent
+      ? bitcoinRepos
+      : bitcoinRepos.filter((r) => r.tier !== "adjacent");
 
-  if (repos.length === 0) {
+    return [...repos].sort((a, b) => {
+      const ca = countByRepo.get(a.nameWithOwner) ?? 0;
+      const cb = countByRepo.get(b.nameWithOwner) ?? 0;
+      return cb - ca;
+    });
+  }, [bitcoinRepos, showAdjacent, countByRepo]);
+
+  if (sorted.length === 0) {
     return (
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
         No Bitcoin-related projects found.
       </p>
     );
   }
-
-  // Sum contribution counts per repo
-  const countByRepo = new Map<string, number>();
-  for (const c of contributions) {
-    if (c.repoNameWithOwner === AGGREGATED_SENTINEL) continue;
-    countByRepo.set(
-      c.repoNameWithOwner,
-      (countByRepo.get(c.repoNameWithOwner) ?? 0) + c.count
-    );
-  }
-
-  // Sort by contribution count descending
-  const sorted = [...repos].sort((a, b) => {
-    const ca = countByRepo.get(a.nameWithOwner) ?? 0;
-    const cb = countByRepo.get(b.nameWithOwner) ?? 0;
-    return cb - ca;
-  });
 
   const visible = sorted.slice(0, visibleCount);
   const hasMore = visibleCount < sorted.length;
@@ -105,7 +107,7 @@ export function TopProjects({ bitcoinRepos, contributions, showAdjacent }: TopPr
         <div className="flex justify-center pt-2">
           <Button
             variant="outline"
-            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+            onClick={() => setPagination({ count: visibleCount + PAGE_SIZE, filter: showAdjacent })}
           >
             Load more
           </Button>
