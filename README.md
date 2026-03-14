@@ -1,52 +1,86 @@
-## Github Developer Review
+# GitHub Developer Review
 
-## Build Phases
+Evaluate Bitcoin open-source contributors for grant funding. Sign in with GitHub, search by username, and view contribution stats, heatmaps, project breakdowns, and filterable PRs, reviews, and issues.
 
-### Phase 1 -- Foundation (Auth + API + Data Layer)
+## Features
 
-- Next.js project scaffold with TypeScript, Tailwind, shadcn/ui
-- GitHub OAuth App setup + Auth.js integration
-- Login page with "Sign in with GitHub" button
-- Protected route middleware (redirect to login if unauthenticated)
-- API route for GraphQL overview (`/api/github/overview/[username]`) using reviewer's OAuth token
-- Bitcoin repo classifier with tiered relevance (`lib/bitcoin-repos.ts` + `config/bitcoin-repos.json`)
-- Server-side cache with Vercel KV (`lib/cache.ts`)
-- Rate-limited fetch helper with per-token tracking and retry/queue logic (`lib/github-search.ts`)
-- Core types in `lib/types.ts`
-- Skeleton components (`Skeletons.tsx`) and error banners (`ErrorBanner.tsx`) -- built from the start, not bolted on later
+- **GitHub OAuth** — Sign in with GitHub to access the dashboard and developer views.
+- **Developer overview** — Profile card, contribution stats, yearly heatmap, and monthly timeline.
+- **Bitcoin projects** — Repos classified as core, ecosystem, or adjacent; top projects with contribution counts and a “Load more” list.
+- **Contributions drill-down** — Tabs for Pull Requests, Reviews, and Issues; filters by date, project, status, and tier; table (desktop) and cards (mobile) with “Load more” pagination.
+- **Recent searches** — Persisted in `localStorage` for quick re-visits from the dashboard.
+- **Rate limit awareness** — UI shows GitHub API rate limit status and retry guidance when applicable.
 
-### Phase 2 -- Search + Overview UI
+## Tech stack
 
-- Search page with recent searches
-- Overview dashboard with skeleton loading states for every section:
-  - Profile card (loads first, single call)
-  - Stats grid (7 cards including commits, merge rate, avg lines changed)
-  - Contribution heatmap
-  - Contribution timeline chart (recharts line chart, monthly aggregation)
-  - Top projects with tier badges
-- SWR data fetching hooks
-- Error banners for rate limit / partial results / API failures
+- **Next.js 16** (App Router), **React 19**
+- **NextAuth v5** (GitHub provider)
+- **Tailwind CSS v4**, **shadcn/ui**
+- **SWR** for data fetching; **Vercel KV** for server-side caching (optional)
+- **Vitest** + **Testing Library** for tests
 
-### Phase 3 -- Drill-Down + Filtering
+## Prerequisites
 
-- API routes for PRs, reviews, comments (REST Search)
-- Drill-down page with tabbed interface (lazy-loaded tabs)
-- ContributionTable with clickable GitHub links + skeleton loading per tab
-- Expandable rows with quality signals (lines changed, commits, time-to-merge) -- lazily fetched via `github-pr-detail.ts`
-- Date filter bar with quick presets
-- Project, status, and tier filters
-- "Load more" pagination
-- Mobile card layout (`ContributionCard.tsx`) for screens < 768px
+- Node.js 20+
+- A [GitHub OAuth App](https://github.com/settings/developers) (Client ID and Client Secret)
 
-### Phase 4 -- Polish + Responsive
+For caching (recommended in production):
 
-- Mobile bottom-sheet for filter bar
-- Horizontal scroll for heatmap + tabs on small screens
-- Responsive stats grid (3x2 -> 2x3 -> 1x6)
-- Rate limit badge in header (per reviewer)
-- Empty states ("No bitcoin contributions found")
-- "Show adjacent projects" toggle on overview
-- End-to-end testing of rate limit recovery (partial results, retry, queue)
-- URL deep linking for drill-down filters
-- Unit tests for Bitcoin repo classifier
-- Accessibility: aria labels on heatmap, keyboard navigation, colorblind-safe badges
+- [Vercel KV](https://vercel.com/docs/storage/vercel-kv) or a Redis-compatible store with the same env vars.
+
+## Environment variables
+
+Create a `.env.local` in the project root:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `AUTH_SECRET` | Yes | Secret for NextAuth session encryption (e.g. `openssl rand -base64 32`) |
+| `AUTH_GITHUB_ID` | Yes | GitHub OAuth App Client ID |
+| `AUTH_GITHUB_SECRET` | Yes | GitHub OAuth App Client Secret |
+| `KV_REST_API_URL` | No | Vercel KV REST API URL (for server-side cache) |
+| `KV_REST_API_TOKEN` | No | Vercel KV REST API token |
+
+Without KV vars, the app still runs; cache reads/writes will fail and the app will fall back to uncached GitHub API calls.
+
+## Getting started
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Sign in with GitHub, then use the dashboard to search for a GitHub username and open their developer overview.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Next.js dev server |
+| `npm run build` | Production build |
+| `npm run start` | Run production server |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run Vitest in watch mode |
+| `npm run test:run` | Run Vitest once (e.g. in CI) |
+
+## CI
+
+The repo includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that on pull requests to `main` runs:
+
+- TypeScript check (`npx tsc --noEmit`)
+- Lint (`npm run lint`)
+- Build (`npm run build`)
+- Tests (`npx vitest run`)
+
+## Project structure (high level)
+
+- `src/app/` — App Router routes: login (`/`), `dashboard`, `developer/[username]`, and API routes under `api/`.
+- `src/components/` — UI: dashboard, developer overview, heatmap, timeline, top projects, contribution drill-down, shared UI and skeletons.
+- `src/hooks/` — Data and UI hooks (e.g. overview, contributions, recent searches, filters).
+- `src/lib/` — Auth, GitHub REST/GraphQL, cache, stats, types, and utilities.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
