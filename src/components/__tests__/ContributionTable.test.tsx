@@ -75,6 +75,32 @@ describe("ContributionTable", () => {
     expect(issueRow).not.toHaveAttribute("role", "button");
   });
 
+  it("renders column headers", () => {
+    render(<ContributionTable items={items} />);
+
+    expect(screen.getByText("Title")).toBeInTheDocument();
+    expect(screen.getByText("Repo")).toBeInTheDocument();
+    expect(screen.getByText("Status")).toBeInTheDocument();
+    expect(screen.getByText("Date")).toBeInTheDocument();
+  });
+
+  it("renders repo name and date for each row", () => {
+    render(<ContributionTable items={items} />);
+
+    expect(screen.getAllByText("bitcoin/bitcoin")).toHaveLength(2);
+  });
+
+  it("collapses expanded PR when clicked again", () => {
+    render(<ContributionTable items={items} />);
+
+    const row = screen.getByText("Fix consensus bug").closest("[role='button']");
+    fireEvent.click(row!);
+    expect(screen.getByTestId("pr-detail")).toBeInTheDocument();
+
+    fireEvent.click(row!);
+    expect(screen.queryByTestId("pr-detail")).not.toBeInTheDocument();
+  });
+
   it("has external links to GitHub", () => {
     render(<ContributionTable items={items} />);
 
