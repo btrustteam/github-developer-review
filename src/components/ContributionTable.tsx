@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn, stateColors } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import { ExpandedPRDetail } from "@/components/ExpandedPRDetail";
+import { ExpandedReviewDetail } from "@/components/ExpandedReviewDetail";
+import { ExpandedIssueDetail } from "@/components/ExpandedIssueDetail";
 import { EmptyState } from "@/components/EmptyState";
 import type { ContributionDetail } from "@/lib/types";
 
@@ -35,7 +37,7 @@ export function ContributionTable({ items }: ContributionTableProps) {
       {/* Data rows */}
       {items.map((item) => {
         const isExpanded = expandedId === item.id;
-        const canExpand = item.type === "pr";
+        const canExpand = item.type === "pr" || item.type === "review" || item.type === "issue";
         const [owner, repo] = item.repoNameWithOwner.split("/");
 
         return (
@@ -91,8 +93,14 @@ export function ContributionTable({ items }: ContributionTableProps) {
                 <ExternalLink className="h-4 w-4" />
               </a>
             </div>
-            {isExpanded && canExpand && (
+            {isExpanded && canExpand && item.type === "pr" && (
               <ExpandedPRDetail owner={owner} repo={repo} number={item.number} />
+            )}
+            {isExpanded && canExpand && item.type === "review" && (
+              <ExpandedReviewDetail owner={owner} repo={repo} number={item.number} />
+            )}
+            {isExpanded && canExpand && item.type === "issue" && (
+              <ExpandedIssueDetail owner={owner} repo={repo} number={item.number} />
             )}
           </div>
         );

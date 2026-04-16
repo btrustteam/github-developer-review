@@ -85,6 +85,13 @@ export interface PRDetail {
   mergedAt: string | null;
   timeToMerge: number | null; // milliseconds
   reviewCount: number;
+  commentCount: number;
+}
+
+export interface IssueDetail {
+  number: number;
+  repoNameWithOwner: string;
+  commentCount: number;
 }
 
 export interface PaginatedContributions {
@@ -94,7 +101,7 @@ export interface PaginatedContributions {
   page: number;
 }
 
-export type DrillDownTab = "prs" | "reviews" | "issues";
+export type DrillDownTab = "prs" | "reviews" | "issues" | "reviewed-issues";
 
 export interface ContributionFilters {
   tab: DrillDownTab;

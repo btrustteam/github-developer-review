@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   searchContributions,
   fetchPRDetail,
+  fetchIssueDetail,
   buildSearchQuery,
   mapSearchItem,
   repoNameFromUrl,
@@ -26,14 +27,19 @@ describe("buildSearchQuery", () => {
     expect(q).toBe("author:alice type:pr");
   });
 
-  it("builds review query with reviewed-by", () => {
+  it("builds review query excluding self-authored PRs", () => {
     const q = buildSearchQuery("alice", { tab: "reviews" });
-    expect(q).toBe("reviewed-by:alice type:pr");
+    expect(q).toBe("reviewed-by:alice type:pr -author:alice");
   });
 
-  it("builds issue query", () => {
+  it("builds authored issue query", () => {
     const q = buildSearchQuery("alice", { tab: "issues" });
     expect(q).toBe("author:alice type:issue");
+  });
+
+  it("builds reviewed-issues query excluding self-authored", () => {
+    const q = buildSearchQuery("alice", { tab: "reviewed-issues" });
+    expect(q).toBe("commenter:alice type:issue -author:alice");
   });
 
   it("adds date range", () => {
@@ -111,6 +117,12 @@ describe("mapSearchItem", () => {
     const result = mapSearchItem(item, "issues");
     expect(result.type).toBe("issue");
     expect(result.state).toBe("closed");
+  });
+
+  it("maps reviewed-issues type", () => {
+    const item = { ...baseItem, pull_request: undefined };
+    const result = mapSearchItem(item, "reviewed-issues");
+    expect(result.type).toBe("issue");
   });
 
   it("maps open state", () => {
@@ -210,6 +222,7 @@ describe("fetchPRDetail", () => {
         deletions: 20,
         changed_files: 5,
         commits: 3,
+        comments: 4,
         merged_at: "2024-06-02T00:00:00Z",
         created_at: "2024-06-01T00:00:00Z",
       };
@@ -224,6 +237,7 @@ describe("fetchPRDetail", () => {
     expect(result.changedFiles).toBe(5);
     expect(result.commits).toBe(3);
     expect(result.reviewCount).toBe(2);
+    expect(result.commentCount).toBe(4);
     expect(result.mergedAt).toBe("2024-06-02T00:00:00Z");
     expect(result.timeToMerge).toBe(86400000); // 1 day in ms
   });
@@ -236,6 +250,7 @@ describe("fetchPRDetail", () => {
         deletions: 5,
         changed_files: 1,
         commits: 1,
+        comments: 0,
         merged_at: null,
         created_at: "2024-06-01T00:00:00Z",
       };
@@ -244,5 +259,28 @@ describe("fetchPRDetail", () => {
     const result = await fetchPRDetail("bitcoin", "bitcoin", 42, "token");
     expect(result.timeToMerge).toBeNull();
     expect(result.mergedAt).toBeNull();
+  });
+});
+
+describe("fetchIssueDetail", () => {
+  it("fetches issue and returns comment count", async () => {
+    mockGithubFetch.mockResolvedValue({
+      comments: 7,
+    });
+
+    const result = await fetchIssueDetail("bitcoin", "bitcoin", 99, "token");
+
+    expect(result.number).toBe(99);
+    expect(result.repoNameWithOwner).toBe("bitcoin/bitcoin");
+    expect(result.commentCount).toBe(7);
+  });
+
+  it("handles issue with zero comments", async () => {
+    mockGithubFetch.mockResolvedValue({
+      comments: 0,
+    });
+
+    const result = await fetchIssueDetail("bitcoin", "bitcoin", 50, "token");
+    expect(result.commentCount).toBe(0);
   });
 });

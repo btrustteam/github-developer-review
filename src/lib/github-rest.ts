@@ -2,6 +2,7 @@ import { githubFetch } from "./github-search";
 import type {
   ContributionDetail,
   PRDetail,
+  IssueDetail,
   PaginatedContributions,
   DrillDownTab,
 } from "./types";
@@ -41,6 +42,7 @@ interface GitHubPR {
   deletions: number;
   changed_files: number;
   commits: number;
+  comments: number;
   merged_at: string | null;
   created_at: string;
 }
@@ -59,9 +61,14 @@ function buildSearchQuery(
   if (filters.tab === "reviews") {
     parts.push(`reviewed-by:${username}`);
     parts.push("type:pr");
+    parts.push(`-author:${username}`);
   } else if (filters.tab === "prs") {
     parts.push(`author:${username}`);
     parts.push("type:pr");
+  } else if (filters.tab === "reviewed-issues") {
+    parts.push(`commenter:${username}`);
+    parts.push("type:issue");
+    parts.push(`-author:${username}`);
   } else {
     parts.push(`author:${username}`);
     parts.push("type:issue");
@@ -97,6 +104,7 @@ function repoNameFromUrl(repositoryUrl: string): string {
 function mapItemType(tab: DrillDownTab): "pr" | "issue" | "review" {
   if (tab === "prs") return "pr";
   if (tab === "reviews") return "review";
+  if (tab === "reviewed-issues") return "issue";
   return "issue";
 }
 
@@ -178,6 +186,29 @@ export async function fetchPRDetail(
     mergedAt,
     timeToMerge,
     reviewCount: reviewsData.length,
+    commentCount: prData.comments,
+  };
+}
+
+interface GitHubIssue {
+  comments: number;
+}
+
+export async function fetchIssueDetail(
+  owner: string,
+  repo: string,
+  number: number,
+  token: string
+): Promise<IssueDetail> {
+  const data = (await githubFetch(
+    `/repos/${owner}/${repo}/issues/${number}`,
+    token
+  )) as GitHubIssue;
+
+  return {
+    number,
+    repoNameWithOwner: `${owner}/${repo}`,
+    commentCount: data.comments,
   };
 }
 

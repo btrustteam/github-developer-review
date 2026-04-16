@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn, stateColors } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import { ExpandedPRDetail } from "@/components/ExpandedPRDetail";
+import { ExpandedReviewDetail } from "@/components/ExpandedReviewDetail";
+import { ExpandedIssueDetail } from "@/components/ExpandedIssueDetail";
 import type { ContributionDetail } from "@/lib/types";
 
 interface ContributionCardProps {
@@ -15,7 +17,7 @@ interface ContributionCardProps {
 
 export function ContributionCard({ item }: ContributionCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const canExpand = item.type === "pr";
+  const canExpand = item.type === "pr" || item.type === "review" || item.type === "issue";
   const [owner, repo] = item.repoNameWithOwner.split("/");
 
   return (
@@ -65,9 +67,19 @@ export function ContributionCard({ item }: ContributionCardProps) {
             <ExternalLink className="h-4 w-4" />
           </a>
         </div>
-        {expanded && canExpand && (
+        {expanded && canExpand && item.type === "pr" && (
           <div className="mt-3">
             <ExpandedPRDetail owner={owner} repo={repo} number={item.number} />
+          </div>
+        )}
+        {expanded && canExpand && item.type === "review" && (
+          <div className="mt-3">
+            <ExpandedReviewDetail owner={owner} repo={repo} number={item.number} />
+          </div>
+        )}
+        {expanded && canExpand && item.type === "issue" && (
+          <div className="mt-3">
+            <ExpandedIssueDetail owner={owner} repo={repo} number={item.number} />
           </div>
         )}
       </CardContent>
