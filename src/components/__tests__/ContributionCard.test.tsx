@@ -3,10 +3,22 @@ import { render, screen, cleanup } from "@testing-library/react";
 import { ContributionCard } from "@/components/ContributionCard";
 import type { ContributionDetail } from "@/lib/types";
 
-// Mock ExpandedPRDetail
+// Mock ExpandedPRDetail and ExpandedIssueDetail
 vi.mock("@/components/ExpandedPRDetail", () => ({
   ExpandedPRDetail: ({ number }: { number: number }) => (
     <div data-testid="pr-detail">PR Detail #{number}</div>
+  ),
+}));
+
+vi.mock("@/components/ExpandedReviewDetail", () => ({
+  ExpandedReviewDetail: ({ number }: { number: number }) => (
+    <div data-testid="review-detail">Review Detail #{number}</div>
+  ),
+}));
+
+vi.mock("@/components/ExpandedIssueDetail", () => ({
+  ExpandedIssueDetail: ({ number }: { number: number }) => (
+    <div data-testid="issue-detail">Issue Detail #{number}</div>
   ),
 }));
 
@@ -67,9 +79,9 @@ describe("ContributionCard", () => {
     expect(expandable).toBeInTheDocument();
   });
 
-  it("issue card has no expand button", () => {
+  it("issue card has expand button", () => {
     render(<ContributionCard item={issueItem} />);
 
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.getByRole("button")).toBeInTheDocument();
   });
 });

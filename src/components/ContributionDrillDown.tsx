@@ -20,12 +20,13 @@ interface ContributionDrillDownProps {
 }
 
 const tabLabels = {
-  prs: "Pull Requests",
-  reviews: "Reviews",
-  issues: "Issues",
+  prs: "Authored Pull Requests",
+  reviews: "Reviewed Pull Requests",
+  issues: "Authored Issues",
+  "reviewed-issues": "Reviewed Issues",
 } as const;
 
-const tabs = ["prs", "reviews", "issues"] as const;
+const tabs = ["prs", "reviews", "issues", "reviewed-issues"] as const;
 
 export function ContributionDrillDown({
   username,
@@ -84,7 +85,7 @@ export function ContributionDrillDown({
             role="tab"
             aria-selected={filters.tab === tab}
             onClick={() => setTab(tab)}
-            className={`whitespace-nowrap flex-shrink-0 px-4 py-2 text-sm font-medium transition-colors ${
+            className={`cursor-pointer whitespace-nowrap flex-shrink-0 px-4 py-2 text-sm font-medium transition-colors ${
               filters.tab === tab
                 ? "border-b-2 border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100"
                 : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"

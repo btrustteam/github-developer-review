@@ -3,10 +3,22 @@ import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { ContributionTable } from "@/components/ContributionTable";
 import type { ContributionDetail } from "@/lib/types";
 
-// Mock the ExpandedPRDetail since it uses SWR
+// Mock the ExpandedPRDetail and ExpandedIssueDetail since they use SWR
 vi.mock("@/components/ExpandedPRDetail", () => ({
   ExpandedPRDetail: ({ number }: { number: number }) => (
     <div data-testid="pr-detail">PR Detail #{number}</div>
+  ),
+}));
+
+vi.mock("@/components/ExpandedReviewDetail", () => ({
+  ExpandedReviewDetail: ({ number }: { number: number }) => (
+    <div data-testid="review-detail">Review Detail #{number}</div>
+  ),
+}));
+
+vi.mock("@/components/ExpandedIssueDetail", () => ({
+  ExpandedIssueDetail: ({ number }: { number: number }) => (
+    <div data-testid="issue-detail">Issue Detail #{number}</div>
   ),
 }));
 
@@ -68,11 +80,14 @@ describe("ContributionTable", () => {
     expect(screen.getByTestId("pr-detail")).toBeInTheDocument();
   });
 
-  it("does not expand issue rows", () => {
+  it("expands issue row on click", () => {
     render(<ContributionTable items={items} />);
 
-    const issueRow = screen.getByText("Add docs").closest("div");
-    expect(issueRow).not.toHaveAttribute("role", "button");
+    const row = screen.getByText("Add docs").closest("[role='button']");
+    expect(row).toBeInTheDocument();
+
+    fireEvent.click(row!);
+    expect(screen.getByTestId("issue-detail")).toBeInTheDocument();
   });
 
   it("renders column headers", () => {

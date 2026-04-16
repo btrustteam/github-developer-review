@@ -86,9 +86,10 @@ describe("ContributionDrillDown", () => {
   it("renders tabs", () => {
     render(<ContributionDrillDown username="alice" bitcoinRepos={bitcoinRepos} />);
 
-    expect(screen.getByText("Pull Requests")).toBeInTheDocument();
-    expect(screen.getByText("Reviews")).toBeInTheDocument();
-    expect(screen.getByText("Issues")).toBeInTheDocument();
+    expect(screen.getByText("Authored Pull Requests")).toBeInTheDocument();
+    expect(screen.getByText("Reviewed Pull Requests")).toBeInTheDocument();
+    expect(screen.getByText("Authored Issues")).toBeInTheDocument();
+    expect(screen.getByText("Reviewed Issues")).toBeInTheDocument();
   });
 
   it("renders date filter bar", () => {
@@ -122,8 +123,11 @@ describe("ContributionDrillDown", () => {
   it("switches tabs", () => {
     render(<ContributionDrillDown username="alice" bitcoinRepos={bitcoinRepos} />);
 
-    fireEvent.click(screen.getByText("Reviews"));
+    fireEvent.click(screen.getByText("Reviewed Pull Requests"));
     expect(mockSetTab).toHaveBeenCalledWith("reviews");
+
+    fireEvent.click(screen.getByText("Reviewed Issues"));
+    expect(mockSetTab).toHaveBeenCalledWith("reviewed-issues");
   });
 
   it("shows load more when hasMore", () => {

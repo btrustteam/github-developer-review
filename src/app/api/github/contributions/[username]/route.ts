@@ -6,7 +6,7 @@ import { GITHUB_USERNAME_RE } from "@/lib/utils";
 import { RateLimitError } from "@/lib/types";
 import type { PaginatedContributions, DrillDownTab } from "@/lib/types";
 
-const VALID_TABS: DrillDownTab[] = ["prs", "reviews", "issues"];
+const VALID_TABS: DrillDownTab[] = ["prs", "reviews", "issues", "reviewed-issues"];
 const VALID_STATUSES = ["open", "closed", "merged", "all"];
 const CACHE_TTL = 600; // 10 minutes
 
