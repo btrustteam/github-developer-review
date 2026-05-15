@@ -14,6 +14,7 @@ import { ContributionTimeline } from "@/components/ContributionTimeline";
 import { TopProjects } from "@/components/TopProjects";
 import { ContributionDrillDown } from "@/components/ContributionDrillDown";
 import { RateLimitBadge } from "@/components/RateLimitBadge";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   ProfileCardSkeleton,
   StatsGridSkeleton,
@@ -56,7 +57,10 @@ export function DeveloperOverviewPage({ username }: DeveloperOverviewPageProps) 
             <ArrowLeft className="h-4 w-4" />
             Back to search
           </Link>
-          <RateLimitBadge />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <RateLimitBadge />
+          </div>
         </div>
 
         {error && (

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRecentSearches } from "@/hooks/use-recent-searches";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function DashboardContent() {
   const router = useRouter();
@@ -45,9 +46,12 @@ export function DashboardContent() {
               {session?.user?.name ?? "Reviewer"}
             </span>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => signOut({ callbackUrl: "/" })}>
-            Sign out
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button variant="ghost" size="sm" onClick={() => signOut({ callbackUrl: "/" })}>
+              Sign out
+            </Button>
+          </div>
         </div>
       </header>
 

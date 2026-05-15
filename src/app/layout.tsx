@@ -26,9 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${poppins.variable} ${geistMono.variable} font-sans antialiased container bg-bg-black text-foreground`}
+        className={`${poppins.variable} ${geistMono.variable} font-sans antialiased container bg-background text-foreground`}
       >
         <Providers>{children}</Providers>
       </body>

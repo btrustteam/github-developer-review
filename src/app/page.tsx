@@ -1,8 +1,12 @@
 import { signIn } from "@/lib/auth";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+    <div className="relative flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <main className="flex flex-col items-center gap-8 px-6">
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-black dark:text-zinc-50">
