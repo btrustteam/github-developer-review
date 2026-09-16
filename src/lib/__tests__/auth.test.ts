@@ -7,6 +7,7 @@ type NextAuthConfig = {
   };
 };
 let capturedConfig: NextAuthConfig | null = null;
+let githubProviderOptions: unknown[] = [];
 
 vi.mock("next-auth", () => ({
   default: vi.fn((config: NextAuthConfig) => {
@@ -21,12 +22,16 @@ vi.mock("next-auth", () => ({
 }));
 
 vi.mock("next-auth/providers/github", () => ({
-  default: vi.fn(() => ({ id: "github", name: "GitHub" })),
+  default: vi.fn((options?: unknown) => {
+    githubProviderOptions.push(options);
+    return { id: "github", name: "GitHub" };
+  }),
 }));
 
 describe("auth", () => {
   beforeEach(async () => {
     capturedConfig = null;
+    githubProviderOptions = [];
     vi.resetModules();
 
     // Re-mock after resetModules
@@ -43,7 +48,10 @@ describe("auth", () => {
     }));
 
     vi.doMock("next-auth/providers/github", () => ({
-      default: vi.fn(() => ({ id: "github", name: "GitHub" })),
+      default: vi.fn((options?: unknown) => {
+        githubProviderOptions.push(options);
+        return { id: "github", name: "GitHub" };
+      }),
     }));
   });
 
@@ -53,6 +61,19 @@ describe("auth", () => {
     expect(authModule.auth).toBeDefined();
     expect(authModule.signIn).toBeDefined();
     expect(authModule.signOut).toBeDefined();
+  });
+
+  // Regression: GitHub implements RFC 9207 and returns `iss` on the OAuth
+  // callback. Without an explicit issuer, @auth/core compares it against its
+  // `https://authjs.dev` placeholder and every sign-in fails with
+  // CallbackRouteError: unexpected "iss" (issuer) response parameter value.
+  it("configures the GitHub provider with GitHub's RFC 9207 issuer", async () => {
+    await import("@/lib/auth");
+
+    expect(githubProviderOptions).toHaveLength(1);
+    expect(githubProviderOptions[0]).toMatchObject({
+      issuer: "https://github.com/login/oauth",
+    });
   });
 
   it("JWT callback sets token.accessToken from account on login", async () => {
