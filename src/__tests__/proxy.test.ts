@@ -76,6 +76,15 @@ describe("proxy", () => {
       expect(response.status).toBe(307);
       expect(new URL(response.headers.get("location")!).pathname).toBe("/");
     });
+
+    // Guards against a redirect loop: / must not bounce to /dashboard on a
+    // session the protected-route check would immediately reject.
+    it("allows / so it cannot ping-pong with /dashboard", async () => {
+      const { proxy } = await import("@/proxy");
+      const response = await proxy(createRequest("/"));
+
+      expect(response.status).toBe(200);
+    });
   });
 
   describe("authenticated", () => {
@@ -95,6 +104,19 @@ describe("proxy", () => {
         createRequest("/developer/satoshi")
       );
       expect(devRes.status).toBe(200);
+    });
+
+    // Regression: returning to / with a valid session cookie showed the login
+    // page instead of the dashboard, because / short-circuited as public
+    // before the session was ever read.
+    it("redirects / to /dashboard", async () => {
+      const { proxy } = await import("@/proxy");
+      const response = await proxy(createRequest("/"));
+
+      expect(response.status).toBe(307);
+      expect(new URL(response.headers.get("location")!).pathname).toBe(
+        "/dashboard"
+      );
     });
   });
 
